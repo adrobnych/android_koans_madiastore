@@ -1,22 +1,17 @@
 package com.adrobnych.imagegalleryinterviewtask.adapters;
 
-import android.support.v4.content.CursorLoader;
-import android.support.v4.widget.CursorAdapter;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.content.Context;
-
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.provider.MediaStore;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-
-import com.adrobnych.imagegalleryinterviewtask.R;
 import com.adrobnych.imagegalleryinterviewtask.ui.MainActivity;
 
 /**
@@ -37,7 +32,7 @@ public class ImageAdapter extends SimpleCursorAdapter {
         ImageView imageView;
         if (convertView == null) {
             imageView = new ImageView(mContext);
-            imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
+            imageView.setLayoutParams(new GridView.LayoutParams(120, 120));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setPadding(8, 8, 8, 8);
         } else {
@@ -60,8 +55,8 @@ public class ImageAdapter extends SimpleCursorAdapter {
 
         Bitmap myBitmap = null;
         if(thumbCursor.moveToFirst()){
-            int thCulumnIndex = thumbCursor.getColumnIndex(MainActivity.thumb_DATA);
-            String thumbPath = thumbCursor.getString(thCulumnIndex);
+            int thumbColumnIndex = thumbCursor.getColumnIndex(MainActivity.thumb_DATA);
+            String thumbPath = thumbCursor.getString(thumbColumnIndex);
             myBitmap = BitmapFactory.decodeFile(thumbPath);
             imageView.setImageBitmap(myBitmap);
         }
