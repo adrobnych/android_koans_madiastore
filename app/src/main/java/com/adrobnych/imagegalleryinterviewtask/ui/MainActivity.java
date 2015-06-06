@@ -1,7 +1,13 @@
 package com.adrobnych.imagegalleryinterviewtask.ui;
 
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,7 +19,14 @@ import com.adrobnych.imagegalleryinterviewtask.R;
 import com.adrobnych.imagegalleryinterviewtask.adapters.ImageAdapter;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
+
+    private final Uri sourceUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+    public final static Uri thumbUri = MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI;
+    public final static String thumb_DATA = MediaStore.Images.Thumbnails.DATA;
+    public final static String thumb_IMAGE_ID = MediaStore.Images.Thumbnails.IMAGE_ID;
+
+    ImageAdapter mySimpleCursorAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,8 +34,27 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         GridView gridview = (GridView) findViewById(R.id.gridview);
-        gridview.setAdapter(new ImageAdapter(this));
 
+
+        CursorLoader cursorLoader = new CursorLoader(
+                this,
+                sourceUri,
+                null,
+                null,
+                null,
+                MediaStore.Audio.Media.TITLE);
+
+        Cursor cursor = cursorLoader.loadInBackground();
+
+        mySimpleCursorAdapter = new ImageAdapter(
+                this,
+                android.R.layout.simple_list_item_1,
+                cursor,
+                new String[]{},
+                new int[]{},
+                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+
+        gridview.setAdapter(mySimpleCursorAdapter);
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
@@ -35,19 +67,13 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
