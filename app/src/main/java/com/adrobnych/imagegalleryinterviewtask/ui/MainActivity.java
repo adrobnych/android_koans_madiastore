@@ -33,15 +33,28 @@ public class MainActivity extends AppCompatActivity {
     public final static String thumb_DATA = MediaStore.Images.Thumbnails.DATA;
     public final static String thumb_IMAGE_ID = MediaStore.Images.Thumbnails.IMAGE_ID;
 
-    ImageAdapter mySimpleCursorAdapter;
+    private ImageAdapter mySimpleCursorAdapter;
+    private GridView gridview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        GridView gridview = (GridView) findViewById(R.id.gridview);
+        gridview = (GridView) findViewById(R.id.gridview);
 
+        updateAdapter();
+
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+                Toast.makeText(MainActivity.this, "" + position,
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateAdapter() {
         String[] getIdsOnly = { MediaStore.Images.Media._ID };
 
         CursorLoader cursorLoader = new CursorLoader(
@@ -52,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 null,
                 null);
 
+        //TODO: close existing cursor
         Cursor cursor = cursorLoader.loadInBackground();
 
         mySimpleCursorAdapter = new ImageAdapter(
@@ -63,13 +77,6 @@ public class MainActivity extends AppCompatActivity {
                 CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
         gridview.setAdapter(mySimpleCursorAdapter);
-        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v,
-                                    int position, long id) {
-                Toast.makeText(MainActivity.this, "" + position,
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
 
@@ -114,19 +121,22 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.d("mainactivity: new photo", imageUri.toString());
 
-                MediaScannerConnection.scanFile(this,
-                        new String[] { imageUri.toString() }, null,
-                        new MediaScannerConnection.OnScanCompletedListener() {
-                            public void onScanCompleted(String path, Uri uri) {
-                                Log.i("ExternalStorage", "Scanned " + path + ":");
-                                Log.i("ExternalStorage", "-> uri=" + uri);
-                            }
-                        });
+                //Before android 4.4
 
-                //Bitmap bmp = (Bitmap) extras.get("data");
+                sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
 
-                // here you will get the image as bitmap
+                //TODO: apply this another strategy for refresh with MSCOnnection After android 4.4:
+//                MediaScannerConnection.scanFile(this,
+//                        new String[] { imageUri.toString() }, null,
+//                        new MediaScannerConnection.OnScanCompletedListener() {
+//                            public void onScanCompleted(String path, Uri uri) {
+//                                Log.i("ExternalStorage", "Scanned " + path + ":");
+//                                Log.i("ExternalStorage", "-> uri=" + uri);
+//                            }
+//                        });
 
+
+                updateAdapter();
 
             }
             else if (resultCode == RESULT_CANCELED) {
