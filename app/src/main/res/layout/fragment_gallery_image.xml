@@ -15,6 +15,16 @@
             android:adjustViewBounds="true"
             />
 
+        <TextView
+            android:id="@+id/favorities"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:background="#EC7703"
+            android:textColor="#ffffff"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true" />
 
     </RelativeLayout>
 
