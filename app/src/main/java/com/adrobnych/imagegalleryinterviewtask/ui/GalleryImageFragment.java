@@ -65,6 +65,7 @@ public class GalleryImageFragment extends Fragment {
 
 
         im.setImageBitmap(getThumbnail(int_ID));
+
     }
 
     //TODO: optimize quality of thumbs. research MINI vs MICRO thumbs

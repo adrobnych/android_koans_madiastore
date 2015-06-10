@@ -58,8 +58,12 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "" + position,
                         Toast.LENGTH_SHORT).show();
 
+                Cursor cursor = mySimpleCursorAdapter.getCursor();
+                cursor.moveToPosition(position);
+
                 Intent i = new Intent(MainActivity.this, ImagePagerActivity.class);
                 i.putExtra("position", position);
+                i.putExtra("image_id", cursor.getInt(cursor.getColumnIndex(MediaStore.Images.Media._ID)));
                 startActivity(i);
             }
         });

@@ -1,5 +1,6 @@
 package com.adrobnych.imagegalleryinterviewtask.ui;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,9 +26,12 @@ import java.util.Map;
 
 
 public class ImagePagerActivity extends ActionBarActivity {
+    public void setImageID(int imageID) {
+        this.imageID = imageID;
+    }
 
-
-
+    private int imageID;
+    private int page;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,8 +40,32 @@ public class ImagePagerActivity extends ActionBarActivity {
 
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(), getAllFragments()));
-        pager.setCurrentItem(getIntent().getIntExtra("position", 0));
 
+        page = getIntent().getIntExtra("position", 0);
+        pager.setCurrentItem(page);
+
+        this.imageID = getIntent().getIntExtra("image_id", -1);
+        pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+
+                Cursor cursor = ((GalleryApp)getApplication()).getMainActivity().
+                        mySimpleCursorAdapter.getCursor();
+                cursor.moveToPosition(position);
+                setImageID(cursor.getInt(cursor.getColumnIndex(MediaStore.Images.Media._ID)));
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
 
@@ -79,17 +107,22 @@ public class ImagePagerActivity extends ActionBarActivity {
     }
 
     private void openImageInExternalApp() {
-
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.parse(getRealImagePath()), "image/*");
+        startActivity(intent);
     }
 
-    private String getRealPathFromURI(Uri contentUri) {
+    private String getRealImagePath() {
         String[] projection = { MediaStore.Images.Media.DATA };
-        CursorLoader loader = new CursorLoader(this, contentUri, projection, null, null, null);
+        Uri uri = Uri.withAppendedPath( MediaStore.Images.Media.EXTERNAL_CONTENT_URI, Integer.toString(imageID) );
+        CursorLoader loader = new CursorLoader(this, uri, projection, null, null, null);
         Cursor cursor = loader.loadInBackground();
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
+        String result = cursor.getString(column_index);
         cursor.close();
-        return cursor.getString(column_index);
+        return result;
     }
 
     public static class MyPagerAdapter extends FragmentPagerAdapter {
