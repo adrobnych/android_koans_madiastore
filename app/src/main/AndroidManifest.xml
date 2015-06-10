@@ -5,7 +5,11 @@
     <uses-feature android:name="android.hardware.camera" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
+        android:name=".GalleryApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -23,6 +27,16 @@
             android:name=".ui.PhotoActivity"
             android:label="@string/title_activity_photo" >
         </activity>
+        <activity
+            android:name=".ui.ImagePagerActivity"
+            android:label="@string/title_activity_image_pager" >
+        </activity>
+
+        <service
+            android:name=".services.GalleryDataLoaderService"
+            android:exported="false" >
+        </service>
     </application>
+
 
 </manifest>

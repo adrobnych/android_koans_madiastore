@@ -1,6 +1,9 @@
 package com.adrobnych.imagegalleryinterviewtask.ui;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
@@ -21,12 +24,14 @@ import android.widget.Toast;
 
 import com.adrobnych.imagegalleryinterviewtask.R;
 import com.adrobnych.imagegalleryinterviewtask.adapters.ImageAdapter;
+import com.adrobnych.imagegalleryinterviewtask.services.GalleryDataLoaderService;
 
 import java.io.File;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    //TODO: load images not only from external storage
     private final Uri sourceUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
     //TODO: reserch situations when image has no thumbnails
     public final static Uri thumbUri = MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI;
@@ -50,9 +55,39 @@ public class MainActivity extends AppCompatActivity {
                                     int position, long id) {
                 Toast.makeText(MainActivity.this, "" + position,
                         Toast.LENGTH_SHORT).show();
+
+                LoadGalleryMessagesAndURLs();
             }
         });
     }
+
+    private void LoadGalleryMessagesAndURLs() {
+        Intent intent = new Intent(this, GalleryDataLoaderService.class);
+        startService(intent);
+    }
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                String result = bundle.getString(GalleryDataLoaderService.RESULT);
+                if (result != null) {
+                    Toast.makeText(MainActivity.this,
+                            "Download complete",
+                            Toast.LENGTH_LONG).show();
+                    //todo notify views...
+                    //tv.setText(result);
+                    Intent i = new Intent(MainActivity.this, ImagePagerActivity.class);
+                    startActivity(i);
+                } else {
+                    Toast.makeText(MainActivity.this, "Download failed",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    };
 
     private void updateAdapter() {
         String[] getIdsOnly = { MediaStore.Images.Media._ID };
@@ -146,4 +181,17 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, new IntentFilter(GalleryDataLoaderService.NOTIFICATION));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
+    }
+
 }
