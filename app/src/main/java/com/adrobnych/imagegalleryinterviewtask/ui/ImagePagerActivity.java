@@ -1,9 +1,13 @@
 package com.adrobnych.imagegalleryinterviewtask.ui;
 
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -32,6 +36,7 @@ public class ImagePagerActivity extends ActionBarActivity {
 
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(), getAllFragments()));
+        pager.setCurrentItem(getIntent().getIntExtra("position", 0));
 
     }
 
@@ -65,11 +70,26 @@ public class ImagePagerActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.open) {
+            openImageInExternalApp();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openImageInExternalApp() {
+
+    }
+
+    private String getRealPathFromURI(Uri contentUri) {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        CursorLoader loader = new CursorLoader(this, contentUri, projection, null, null, null);
+        Cursor cursor = loader.loadInBackground();
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        cursor.close();
+        return cursor.getString(column_index);
     }
 
     public static class MyPagerAdapter extends FragmentPagerAdapter {

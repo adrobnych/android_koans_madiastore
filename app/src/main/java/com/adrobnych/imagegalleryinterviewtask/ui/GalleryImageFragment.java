@@ -29,17 +29,17 @@ public class GalleryImageFragment extends Fragment {
     View view;
 
     public static GalleryImageFragment newInstance(int page) {
-        GalleryImageFragment f = new GalleryImageFragment();
+        GalleryImageFragment fragment = new GalleryImageFragment();
         Bundle args = new Bundle();
-        args.putInt("someInt", page);
-        f.setArguments(args);
-        return f;
+        args.putInt("page", page);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        page = getArguments().getInt("someInt", 0);
+        page = getArguments().getInt("page", 0);
 ;
     }
 
@@ -67,6 +67,7 @@ public class GalleryImageFragment extends Fragment {
         im.setImageBitmap(getThumbnail(int_ID));
     }
 
+    //TODO: optimize quality of thumbs. research MINI vs MICRO thumbs
     private Bitmap getThumbnail(int id){
 
         String[] thumbColumns = {MainActivity.thumb_DATA, MainActivity.thumb_IMAGE_ID};
@@ -86,9 +87,6 @@ public class GalleryImageFragment extends Fragment {
             int thCulumnIndex = thumbCursor.getColumnIndex(MainActivity.thumb_DATA);
 
             String thumbPath = thumbCursor.getString(thCulumnIndex);
-
-            //Toast.makeText(getActivity().getApplicationContext(), thumbPath,
-            //        Toast.LENGTH_LONG).show();
 
             thumbBitmap = BitmapFactory.decodeFile(thumbPath);
 
