@@ -12,7 +12,7 @@ import android.view.MenuItem;
 
 import com.adrobnych.imagegalleryinterviewtask.GalleryApp;
 import com.adrobnych.imagegalleryinterviewtask.R;
-import com.adrobnych.imagegalleryinterviewtask.model.GalleryImageManager;
+
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -23,44 +23,24 @@ import java.util.Map;
 public class ImagePagerActivity extends ActionBarActivity {
 
 
-    private GalleryImageManager gm;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        enableHTTPResponceCache();
-
         setContentView(R.layout.activity_image_pager);
-        gm = ((GalleryApp) getApplication()).getGalleryManager();
 
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(), getAllFragments()));
 
     }
 
-    private void enableHTTPResponceCache(){
-        try {
-            long httpCacheSize = 50 * 1024 * 1024;
-            File httpCacheDir = new File(getCacheDir() + "http");
 
-            Class.forName("android.net.http.HttpResponseCache")
-                    .getMethod("install", File.class, long.class)
-                    .invoke(null, httpCacheDir, httpCacheSize);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
 
     private Map<Integer, Fragment> getAllFragments() {
         Map<Integer, Fragment> fragmentMap = new HashMap<>();
-        for(int i=0; i<gm.getGallerySize(); i++)
+        int count = ((GalleryApp)getApplication()).getMainActivity().mySimpleCursorAdapter.getCursor().getCount();
+        for(int i=0; i<count; i++)
             fragmentMap.put(i, GalleryImageFragment.newInstance(i));
 
 

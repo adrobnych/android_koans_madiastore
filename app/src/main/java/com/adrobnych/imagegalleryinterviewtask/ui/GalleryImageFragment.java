@@ -1,36 +1,32 @@
 package com.adrobnych.imagegalleryinterviewtask.ui;
 
+import android.app.AlertDialog;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.CursorLoader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.adrobnych.imagegalleryinterviewtask.GalleryApp;
 import com.adrobnych.imagegalleryinterviewtask.R;
-import com.adrobnych.imagegalleryinterviewtask.model.GalleryImageManager;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 
 
 public class GalleryImageFragment extends Fragment {
 
     private int page;
-    Bitmap bmp;
     ImageView im;
-    URL url;
     View view;
-    GalleryImageManager gm;
 
     public static GalleryImageFragment newInstance(int page) {
         GalleryImageFragment f = new GalleryImageFragment();
@@ -54,51 +50,55 @@ public class GalleryImageFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_gallery_image, container, false);
         im = (ImageView) view.findViewById(R.id.imageView);
 
-        gm = ((GalleryApp)getActivity().getApplication()).getGalleryManager();
-
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        //TextView messageTV = (TextView) view.findViewById(R.id.tvMessageTitle);
-        //messageTV.setText(gm.getGalleryItemById(page).get(GalleryImageManager.MESSAGE));
 
-        //TextView pageTV = (TextView) view.findViewById(R.id.tvPageCounter);
-        //pageTV.setText("" + page + "/" + gm.getGallerySize());
+        Cursor cursor =
+            ((GalleryApp)(getActivity().getApplication())).getMainActivity().mySimpleCursorAdapter.getCursor();
+        cursor.moveToPosition(page);
 
-        url = null;
-        try {
-            url = new URL(gm.getGalleryItemById(page).get(GalleryImageManager.IMAGE_URL));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        new LongOperation().execute("");
+        int int_ID = cursor.getInt(cursor.getColumnIndex(MediaStore.Images.Media._ID));
 
+
+        im.setImageBitmap(getThumbnail(int_ID));
     }
 
-    private class LongOperation extends AsyncTask<String, Void, String> {
+    private Bitmap getThumbnail(int id){
 
-        @Override
-        protected String doInBackground(String... params) {
-            bmp = null;
-            try {
-                URLConnection connection = url.openConnection();
-                connection.setUseCaches(true);
-                bmp = BitmapFactory.decodeStream((InputStream) connection.getContent());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return "Executed";
+        String[] thumbColumns = {MainActivity.thumb_DATA, MainActivity.thumb_IMAGE_ID};
+
+        CursorLoader thumbCursorLoader = new CursorLoader(
+                getActivity(),
+                MainActivity.thumbUri,
+                thumbColumns,
+                MainActivity.thumb_IMAGE_ID + "=" + id,
+                null,
+                null);
+
+        Cursor thumbCursor = thumbCursorLoader.loadInBackground();
+
+        Bitmap thumbBitmap = null;
+        if(thumbCursor.moveToFirst()){
+            int thCulumnIndex = thumbCursor.getColumnIndex(MainActivity.thumb_DATA);
+
+            String thumbPath = thumbCursor.getString(thCulumnIndex);
+
+            //Toast.makeText(getActivity().getApplicationContext(), thumbPath,
+            //        Toast.LENGTH_LONG).show();
+
+            thumbBitmap = BitmapFactory.decodeFile(thumbPath);
+
+        }else{
+            Toast.makeText(getActivity().getApplicationContext(),
+                    "NO Thumbnail!",
+                    Toast.LENGTH_LONG).show();
         }
 
-        @Override
-        protected void onPostExecute(String result) {
-
-            im.setImageBitmap(bmp);
-        }
-
+        return thumbBitmap;
     }
 
 

@@ -22,9 +22,9 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import com.adrobnych.imagegalleryinterviewtask.GalleryApp;
 import com.adrobnych.imagegalleryinterviewtask.R;
 import com.adrobnych.imagegalleryinterviewtask.adapters.ImageAdapter;
-import com.adrobnych.imagegalleryinterviewtask.services.GalleryDataLoaderService;
 
 import java.io.File;
 
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     public final static String thumb_DATA = MediaStore.Images.Thumbnails.DATA;
     public final static String thumb_IMAGE_ID = MediaStore.Images.Thumbnails.IMAGE_ID;
 
-    private ImageAdapter mySimpleCursorAdapter;
+    public ImageAdapter mySimpleCursorAdapter;
     private GridView gridview;
 
     @Override
@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
 
         gridview = (GridView) findViewById(R.id.gridview);
 
+        ((GalleryApp)getApplication()).setMainActivity(this);
+
         updateAdapter();
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -56,38 +58,13 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "" + position,
                         Toast.LENGTH_SHORT).show();
 
-                LoadGalleryMessagesAndURLs();
+                Intent i = new Intent(MainActivity.this, ImagePagerActivity.class);
+                i.putExtra("position", position);
+                startActivity(i);
             }
         });
     }
 
-    private void LoadGalleryMessagesAndURLs() {
-        Intent intent = new Intent(this, GalleryDataLoaderService.class);
-        startService(intent);
-    }
-
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Bundle bundle = intent.getExtras();
-            if (bundle != null) {
-                String result = bundle.getString(GalleryDataLoaderService.RESULT);
-                if (result != null) {
-                    Toast.makeText(MainActivity.this,
-                            "Download complete",
-                            Toast.LENGTH_LONG).show();
-                    //todo notify views...
-                    //tv.setText(result);
-                    Intent i = new Intent(MainActivity.this, ImagePagerActivity.class);
-                    startActivity(i);
-                } else {
-                    Toast.makeText(MainActivity.this, "Download failed",
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-    };
 
     private void updateAdapter() {
         String[] getIdsOnly = { MediaStore.Images.Media._ID };
@@ -150,9 +127,6 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
 
-                //use imageUri here to access the image
-
-                //Bundle extras = data.getExtras();
 
                 Log.d("mainactivity: new photo", imageUri.toString());
 
@@ -182,16 +156,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        registerReceiver(receiver, new IntentFilter(GalleryDataLoaderService.NOTIFICATION));
-    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceiver(receiver);
-    }
 
 }
