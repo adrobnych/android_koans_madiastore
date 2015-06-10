@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     //TODO: load images not only from external storage
     private final Uri sourceUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-    //TODO: reserch situations when image has no thumbnails
+    //TODO: research situations when image has no thumbnails
     public final static Uri thumbUri = MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI;
     public final static String thumb_DATA = MediaStore.Images.Thumbnails.DATA;
     public final static String thumb_IMAGE_ID = MediaStore.Images.Thumbnails.IMAGE_ID;

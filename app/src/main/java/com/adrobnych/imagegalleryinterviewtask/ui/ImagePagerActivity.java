@@ -10,22 +10,18 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-
 
 import com.adrobnych.imagegalleryinterviewtask.GalleryApp;
 import com.adrobnych.imagegalleryinterviewtask.R;
 
-
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
 
-public class ImagePagerActivity extends ActionBarActivity {
+public class ImagePagerActivity extends AppCompatActivity {
     public void setImageID(int imageID) {
         this.imageID = imageID;
     }
@@ -82,22 +78,16 @@ public class ImagePagerActivity extends ActionBarActivity {
     }
 
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_image_pager, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.open) {
             openImageInExternalApp();
             return true;
@@ -106,23 +96,14 @@ public class ImagePagerActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    //TODO: investigate Google+ crash in some apps
     private void openImageInExternalApp() {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.parse(getRealImagePath()), "image/*");
+        intent.setDataAndType(
+                Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, Integer.toString(imageID)),
+                "image/*");
         startActivity(intent);
-    }
-
-    private String getRealImagePath() {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Uri uri = Uri.withAppendedPath( MediaStore.Images.Media.EXTERNAL_CONTENT_URI, Integer.toString(imageID) );
-        CursorLoader loader = new CursorLoader(this, uri, projection, null, null, null);
-        Cursor cursor = loader.loadInBackground();
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        String result = cursor.getString(column_index);
-        cursor.close();
-        return result;
     }
 
     public static class MyPagerAdapter extends FragmentPagerAdapter {
