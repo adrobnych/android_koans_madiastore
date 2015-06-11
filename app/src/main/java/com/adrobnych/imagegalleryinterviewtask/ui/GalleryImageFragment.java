@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.CursorLoader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,11 +22,14 @@ import android.widget.Toast;
 import com.adrobnych.imagegalleryinterviewtask.GalleryApp;
 import com.adrobnych.imagegalleryinterviewtask.R;
 
+import java.sql.SQLException;
+
 
 public class GalleryImageFragment extends Fragment {
 
     private int page;
     ImageView im;
+    TextView tv;
     View view;
 
     public static GalleryImageFragment newInstance(int page) {
@@ -49,6 +53,7 @@ public class GalleryImageFragment extends Fragment {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_gallery_image, container, false);
         im = (ImageView) view.findViewById(R.id.imageView);
+        tv = (TextView) view.findViewById(R.id.favorities);
 
         return view;
     }
@@ -61,10 +66,17 @@ public class GalleryImageFragment extends Fragment {
             ((GalleryApp)(getActivity().getApplication())).getMainActivity().mySimpleCursorAdapter.getCursor();
         cursor.moveToPosition(page);
 
-        int int_ID = cursor.getInt(cursor.getColumnIndex(MediaStore.Images.Media._ID));
+        int imageID = cursor.getInt(cursor.getColumnIndex(MediaStore.Images.Media._ID));
+        im.setImageBitmap(getThumbnail(imageID));
 
-
-        im.setImageBitmap(getThumbnail(int_ID));
+        try {
+            if(((GalleryApp)(getActivity().getApplication())).getFavoritesManager().isFavorite(imageID))
+                tv.setText("favorites");
+            else
+                tv.setText("");
+        } catch (SQLException e) {
+            Log.e("GalleryImageFragment", e.toString());
+        }
 
     }
 

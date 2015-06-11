@@ -11,12 +11,14 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.adrobnych.imagegalleryinterviewtask.GalleryApp;
 import com.adrobnych.imagegalleryinterviewtask.R;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,17 +30,17 @@ public class ImagePagerActivity extends AppCompatActivity {
 
     private int imageID;
     private int page;
+    private ViewPager pager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_pager);
 
-        ViewPager pager = (ViewPager) findViewById(R.id.pager);
-        pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(), getAllFragments()));
-
+        pager = (ViewPager) findViewById(R.id.pager);
         page = getIntent().getIntExtra("position", 0);
-        pager.setCurrentItem(page);
+
+        resetPagerAdapter();
 
         this.imageID = getIntent().getIntExtra("image_id", -1);
         pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -55,6 +57,8 @@ public class ImagePagerActivity extends AppCompatActivity {
                 cursor.moveToPosition(position);
                 setImageID(cursor.getInt(cursor.getColumnIndex(MediaStore.Images.Media._ID)));
 
+                page = position;
+
             }
 
             @Override
@@ -64,6 +68,10 @@ public class ImagePagerActivity extends AppCompatActivity {
         });
     }
 
+    private void resetPagerAdapter() {
+        pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager(), getAllFragments()));
+        pager.setCurrentItem(page);
+    }
 
 
     private Map<Integer, Fragment> getAllFragments() {
@@ -93,7 +101,21 @@ public class ImagePagerActivity extends AppCompatActivity {
             return true;
         }
 
+        if (id == R.id.favorite) {
+            favoriteImage();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    private void favoriteImage() {
+        try {
+            ((GalleryApp)getApplication()).getFavoritesManager().markAsFavorite(imageID);
+            resetPagerAdapter();
+        } catch (SQLException e) {
+            Log.e("ImagePagerActivity", e.toString());
+        }
     }
 
     //TODO: investigate Google+ crash in some apps
